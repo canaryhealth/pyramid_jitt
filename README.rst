@@ -114,4 +114,4 @@ More documentation can be found in the `Manual`_.
 
 .. TODO .. move the manual to pythonhosted.org...
 
-.. _Manual: https://github.com/canaryhealth/pyramid_jitt/blob/master/pyramid_jitt/doc/manual.py
+.. _Manual: https://github.com/canaryhealth/pyramid_jitt/blob/master/doc/manual.rst

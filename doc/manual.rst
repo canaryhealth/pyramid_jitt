@@ -9,8 +9,8 @@ Overview
 Pyramid JITT helps Pyramid applications assemble, pre-compile,
 package, cache, and access-control the delivery of templates to
 clients. Typically, these are JavaScript-based templates (such as
-Handlebars_ or Mustache_) that are used in rich internet applications
-running in browsers.
+`Handlebars`_ or `Mustache`_) that are used in rich internet
+applications running in browsers.
 
 In essence, Pyramid-JITT is just a wrapper around the `jstc`_
 JavaScript template compiler that adds automation, segregation into
@@ -25,7 +25,7 @@ could be the corresponding "user" and "admin" JITT realms.
 
 Within each realm, the templates are divided into
 **channels**. Although in theory the number and names of channels is
-undefined, the current the JITT system makes many assumptions around
+open-ended, the current the JITT system makes many assumptions around
 the existence of the following channels:
 
 * the ``inline`` channel: the set of templates delivered in the
@@ -55,11 +55,10 @@ restrictions of each channel may be extended and/or enhanced.
 Channel ``inline``
 ------------------
 
-This channel comprises the templates that are delivered along with,
-i.e. they are inlined within, the base HTML page. As such, they are
-the set that need to be present immediately at initial page load and
-are not access-controlled, i.e. they are viewed as being publicly
-accessible.
+This channel comprises the templates that are delivered along with
+(i.e. are inlined within) the base HTML page. As such, they are the
+set that need to be present immediately at initial page load and are
+not access-controlled, i.e. they should be publicly accessible.
 
 
 Channel ``deferred``
@@ -69,14 +68,14 @@ This channel comprises the templates that are delivered
 asynchronously to the base HTML page, immediately after the HTML has
 been delivered to the client. This channel typically contains the
 majority of templates required for the application, but not for the
-initial rendering. It channel is not access-controlled.
+initial rendering. This channel is NOT access-controlled.
 
 
 Channel ``protected``
 ---------------------
 
 This channel comprises the deferred templates that should not be
-delivered to the public; they are loaded asynchronously after the
+delivered to the public: they are loaded asynchronously after the
 application authenticates the user.
 
 
@@ -95,19 +94,18 @@ Templates
 
 Pyramid JITT places very few requirements and/or restrictions on how
 templates are organized, formatted, or structured. There are, however,
-some conventions that exist that help in this regard. This section
-details them.
+some conventions/assumptions that exist that accelerate
+implementation, as follows.
 
 
 Template Discovery
 ------------------
 
-The ``{REALM}.assets`` configuration specifies the files that will be
-used to find the templates. Easiest is to use a dedicated file
-extension for client-side templates, e.g. ``.hbs`` for `Handlebars`_
-templates; then, the asset specification ``mypackage:**.hbs`` will
-find all the filenames that end with ``.hbs`` in the `mypackage`
-Python package.
+The ``{REALM}.assets`` configuration specifies the files that contain
+the templates. Easiest is to use a dedicated file extension for
+client-side templates (e.g. ``.hbs`` for `Handlebars`_ templates);
+then, the asset specification ``mypackage:**.hbs`` will find all the
+filenames that end with ``.hbs`` in the `mypackage` Python package.
 
 
 Name Transformation
@@ -130,17 +128,16 @@ scheme is needed.
 Note that the special token ``__here__`` is removed from the template
 name. For example, the filename ``foo/bar/__here__.hbs`` will be, by
 default, transformed to the template name ``foo/bar``. This allows
-sub-directories to contain a template named after the parent's
-directory.
+directories to contain a template named after itself.
 
 
 Comments
 --------
 
 Within each template file, any line that starts with the comment
-sequence which by default is ``##`` will be stripped out before being
-sent to the client. This allows templates to contain content that
-will not be exposed to the public. Example:
+sequence (by default ``##``) will be stripped out before being sent to
+the client. This allows templates to contain content that will not be
+exposed to the client. Example:
 
 .. code:: html
 
@@ -154,15 +151,16 @@ will not be exposed to the public. Example:
 Multi-Template Files
 --------------------
 
-Each file can optionally contain a set of templates instead of just a
-one-to-one mapping. Any file that starts with the multi-template
-token, which defaults to ``##!``, will be split into multiple
-templates. The file content will be split at every line that starts
-with the multi-template token, and the rest of the line is used to
-specify the template name and optionally any attributes. The final
-template name is constructed by appending the name specified to the
-file's evaluated template name, removing any ``__here__`` tokens
-(similar to the normal filename-to-templatename translation).
+Each file can, with special formatting, contain a set of templates
+instead of just one. Any file that starts with the multi-template
+token (by default ``##!``) will be split into multiple templates. The
+file content will be split at every line that starts with the
+multi-template token, and the rest of the line is used to specify the
+template name and optionally any attributes. The final template name
+is constructed by concatenating the file's evaluated template name and
+the name extracted after the multi-template token, removing any
+``__here__`` tokens (similar to the normal filename-to-templatename
+translation).
 
 For example, given the following file ``hello.hbs``:
 
@@ -198,7 +196,7 @@ commonly used:
 
 * ``type``: the template engine type
 * ``trim``: flag to control dedenting and stripping of template content
-* ``precompile``: flag to control server-side pre-compile the template
+* ``precompile``: flag to control server-side pre-compilation
 * ``inline``: flag to control inclusion in the ``inline`` channel
 * ``protected``: flag to control inclusion in the ``protected`` channel
 
@@ -211,11 +209,11 @@ the client can be customized, but the default configuration expects
 you to use the JITT loader.
 
 The JITT loader is normally included in the initial construction of
-the initial HTML base page. It then exposes a `.ready` JavaScript
+the initial HTML base page. It then exposes a ``.ready()`` JavaScript
 function that is used to specify a callback that is invoked when the
 ``inline`` and ``deferred`` (if any) templates have been loaded. Here
-is a `Mako`_ example of how to add the JITT loader to your "webapp"
-HTML application and how to hook into it with a callback:
+is a `Mako`_ example of how to add the JITT loader to your HTML
+application in the "webapp" realm and hook into it with a callback:
 
 .. code:: mako
 
@@ -249,7 +247,7 @@ Protected Templates
 -------------------
 
 The ``protected`` channel templates will not have been delivered when
-the `.ready()` callback is called; instead, you must explicitly
+the ``.ready()`` callback is called; instead, you must explicitly
 request the delivery of the protected templates after authentication
 has occurred. The following JavaScript can be used for that purpose:
 
@@ -265,9 +263,9 @@ has occurred. The following JavaScript can be used for that purpose:
 Deferred Endpoints
 ------------------
 
-The Pyramid JITT implementation defers the loading of templates by
-loading them asynchronously. In order for that to work, Pyramid JITT
-exposes a set of URL endpoints that are, by default, mounted at
+The Pyramid JITT implementation defers the loading of some templates
+by loading them asynchronously. In order for that to work, Pyramid
+JITT exposes a set of URL endpoints that are, by default, mounted at
 ``/jitt/``. Specifically, all groups of templates are made available
 at ``/jitt/{REALM}/{CHANNEL}``.
 
@@ -286,6 +284,7 @@ in the HTML page. If this is not the case and you wish to use an
 alternative deferred-loading mechanism, the following configurations
 can be used to customize the rendering:
 
+* ``{REALM}.overrides.inline``
 * ``{REALM}.loader.always``
 * ``{REALM}.deferred-html``
 * ``{REALM}.deferred-js``
@@ -310,7 +309,7 @@ can be defaulted and overriden on a per-realm basis in this manner.
 
 The following parameters are supported:
 
-* ``{REALM}.id`` : str, default: Templates
+* ``{REALM}.id`` : str, default: "Templates"
 
   Specifies the "id" attribute of the top-level HTML element that
   contains the JavaScript templates.
@@ -331,10 +330,10 @@ The following parameters are supported:
 * ``{REALM}.assets`` : asset-spec | list(asset-spec)
 
   Specifies a list of globre asset-spec's of which assets to include
-  in the realm. For example, the following will recursively search for
-  all files that end in ``.mustache`` in the ``static/common`` and
-  ``static/webapp`` directories of the ``myapp`` package for the
-  ``webapp`` realm:
+  in the realm. For example, the following will, for the ``webapp``
+  realm, recursively search for all files that end in ``.mustache`` in
+  the ``static/common`` and ``static/webapp`` directories of the
+  ``myapp`` package:
 
   .. code:: ini
 
@@ -343,7 +342,7 @@ The following parameters are supported:
       myapp:static/webapp/**.mustache
 
 
-  See `{REALM}.roots` for details on how to map an asset name to a
+  See ``{REALM}.roots`` for details on how to map an asset name to a
   template name.
 
 * ``{REALM}.roots`` : str | list(str)
@@ -354,10 +353,14 @@ The following parameters are supported:
   respective root is ``static/common``, then the name will be
   interpreted as ``segment/filename``.
 
-  See `{REALM}.name_transform` for greater control than simple
+  The root at index N applies to the corresponding asset at index N.
+  If the number of assets in ``{REALM}.assets`` exceeds the number of
+  roots in ``{REALM}.roots``, then the last root is used.
+
+  See ``{REALM}.name_transform`` for greater control than simple
   prefix-chopping.
 
-* ``{REALM}.cache-region`` : str, default: pyramid_jitt
+* ``{REALM}.cache-region`` : str, default: "pyramid_jitt"
 
   Sets the `beaker` cache region to use for this realm. To disable
   caching (bad idea!) set this to an empty string.
@@ -414,7 +417,7 @@ The following parameters are supported:
 
     jitt.overrides.trim        = true
     jitt.overrides.inline      = true
-    jitt.@admin.overrides.trim = true
+    jitt.@admin.overrides.trim = false
 
 
   See the `jstc`_ package for a full listing of supported template
@@ -438,18 +441,20 @@ The following parameters are supported:
 * ``{REALM}.loader.always`` : bool, default: true
 
   Sets whether or not the JavaScript JIT loader is always inserted
-  into the rendered output, or only when required (i.e. when there are
-  no non-inlined templates, the JIT loader isn't technically
-  necessary).
+  into the rendered output, or only when required. Technically, when
+  there are no non-inlined templates, the JIT loader isn't necessary,
+  but by default it is still loaded so that the client-side
+  implementation does not need to change based on whether or not there
+  are asynchronous templates.
 
 
 Callbacks
 =========
 
 The callbacks called by `pyramid_jitt` have the same parameters as
-their respective `jstc` callbacks with the addition of two parameters,
-`realm` and `channel`, which are prefixed as the first two positional
-parameters.
+their respective `jstc`_ callbacks with the addition of two
+parameters, `realm` and `channel`, which are prefixed as the first two
+positional parameters.
 
 .. IMPORTANT::
 
@@ -463,7 +468,8 @@ A More Involved Example
 =======================
 
 Here is a more complex configuration example, with multiple realms
-with different caching rules, asset locations, etc:
+with different caching rules, asset locations, and forcing all "admin"
+templates to be protected, etc:
 
 .. code:: ini
 
@@ -496,10 +502,23 @@ with different caching rules, asset locations, etc:
   jitt.@admin.roots             =
     static/scripts
     static/scripts/admin
+  jitt.@admin.template_transform = myapp.lib.admin:template_transform
 
+
+
+Then, in your application's ``myapp/lib/admin.py`` file:
+
+.. code:: python
+
+  def template_transform(realm, channel, text, attributes):
+    if realm == 'admin' and attributes.get('name').startswith('admin/'):
+      attributes['protected'] = True
+    return (text, attributes)
 
 
 .. _jstc: https://pypi.python.org/pypi/jstc
 .. _pyramid_beaker: https://pypi.python.org/pypi/pyramid_beaker
 .. _Mako: http://www.makotemplates.org/
 .. _jQuery: http://jquery.com/
+.. _Handlebars: http://handlebarsjs.com/
+.. _Mustache: http://mustache.github.io/
