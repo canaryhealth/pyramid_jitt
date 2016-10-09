@@ -9,10 +9,13 @@
 import morph
 
 from .engine import Engine
+from .controller import JittController
 
 #------------------------------------------------------------------------------
 
 CONFIG_PREFIX           = 'jitt.'
+DEFAULT_MOUNT_NAME      = 'JittController'
+DEFAULT_MOUNT_PATH      = Engine.DEFAULT_MOUNT_PATH
 
 #------------------------------------------------------------------------------
 def includeme(config):
@@ -21,11 +24,17 @@ def includeme(config):
   the specified `config` regisry. See
   `https://github.com/canaryhealth/pyramid_jitt`_ for details.
   '''
+  settings = morph.pick(config.get_settings(), prefix=CONFIG_PREFIX)
+  engine   = Engine(settings=settings)
   # todo: determine what the "correct" way of providing a Pyramid
   #       service is...
-  config.registry.jitt = Engine(
-    settings = morph.pick(config.get_settings(), prefix=CONFIG_PREFIX),
-  )
+  config.registry.jitt = engine
+  # /todo
+  path = settings.get('mount-path', DEFAULT_MOUNT_PATH).strip()
+  if path:
+    name = settings.get('mount-name', DEFAULT_MOUNT_NAME).strip()
+    config.include('pyramid_controllers')
+    config.add_controller(name, path, JittController(engine))
 
 #------------------------------------------------------------------------------
 # end of $Id$
