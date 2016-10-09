@@ -9,12 +9,10 @@ TODO's
 * Auto-detect if the jitt caching regions have been configured, and if
   not, issue warning and disable caching
 
-* Add controller support for:
+* Add awareness that a set of template names should default to
+  inlined, eg:
 
-  - /jitt/admin/inline
-  - /jitt/admin/public | deferred
-  - /jitt/admin/private | protected
-  - /jitt/admin/jit/{PATH}
+    DEFAULT_AUTOINLINE         = ('loading', 'application', 'error')
 
 * Add support for template attributes:
 
